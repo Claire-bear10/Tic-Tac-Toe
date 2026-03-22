@@ -439,11 +439,11 @@
       let move;
 
       if (difficulty === 'easy') {
-        // Easy: always picks a random empty spot
-        move = getRandomMove();
+        // Easy: 40% smart, 60% random - blocks sometimes but still beatable
+        move = Math.random() < 0.4 ? getBestMove([...board]) : getRandomMove();
       } else if (difficulty === 'medium') {
-        // Intermediate: 50% chance of smart move, 50% random
-        move = Math.random() < 0.5 ? getBestMove([...board]) : getRandomMove();
+        // Intermediate: 80% smart, 20% random - plays well but slips up occasionally
+        move = Math.random() < 0.8 ? getBestMove([...board]) : getRandomMove();
       } else {
         // Advanced: always picks the best move (unbeatable!)
         move = getBestMove([...board]);
