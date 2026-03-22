@@ -536,26 +536,41 @@
     }
 
     function listenForGameStart() {
-      firebaseListener = new EventSource(`${DB_URL}/games/${roomCode}.json`);
-      firebaseListener.addEventListener('put', (e) => {
-        const data = JSON.parse(e.data).data;
-        if (data && data.players && data.players.O) {
-          stopFirebaseListener();
-          yourSymbolEl.textContent = 'You are X! You go first!';
-          resetBoard();
-          showScreen('game-screen');
-          turnEl.textContent = "Your turn! (X)";
-          listenForMoves();
-        }
-      });
+      let started = false;
+      firebaseListener = { close: () => { started = true; } };
+      const poll = setInterval(async () => {
+        if (started) { clearInterval(poll); return; }
+        try {
+          const res = await fetch(`${DB_URL}/games/${roomCode}.json`);
+          const data = await res.json();
+          if (data && data.players && data.players.O) {
+            started = true;
+            clearInterval(poll);
+            yourSymbolEl.textContent = 'You are X! You go first!';
+            resetBoard();
+            showScreen('game-screen');
+            turnEl.textContent = "Your turn! (X)";
+            messageEl.textContent = "You are X! You go first!";
+            listenForMoves();
+          }
+        } catch(e) {}
+      }, 1500);
     }
 
     function listenForMoves() {
-      firebaseListener = new EventSource(`${DB_URL}/games/${roomCode}.json`);
-      firebaseListener.addEventListener('put', (e) => {
-        const data = JSON.parse(e.data).data;
-        if (data) syncBoardFromFirebase(data);
-      });
+      let lastBoard = JSON.stringify(board);
+      firebaseListener = { close: () => { lastBoard = null; } };
+      const poll = setInterval(async () => {
+        if (lastBoard === null) { clearInterval(poll); return; }
+        try {
+          const res = await fetch(`${DB_URL}/games/${roomCode}.json`);
+          const data = await res.json();
+          if (data && data.board && JSON.stringify(data.board) !== lastBoard) {
+            lastBoard = JSON.stringify(data.board);
+            syncBoardFromFirebase(data);
+          }
+        } catch(e) {}
+      }, 1000);
     }
 
     function syncBoardFromFirebase(data) {
