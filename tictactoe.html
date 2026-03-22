@@ -174,6 +174,63 @@
       color: #6600cc;
       font-weight: bold;
     }
+
+    /* Difficulty buttons */
+    .easy-btn {
+      width: 290px;
+      padding: 18px;
+      font-size: 22px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      background-color: #33bb55;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 0 #228844;
+      transition: transform 0.1s;
+    }
+    .easy-btn:hover { background-color: #228844; transform: translateY(2px); box-shadow: 0 2px 0 #228844; }
+
+    .medium-btn {
+      width: 290px;
+      padding: 18px;
+      font-size: 22px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      background-color: #ffaa00;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 0 #cc8800;
+      transition: transform 0.1s;
+    }
+    .medium-btn:hover { background-color: #cc8800; transform: translateY(2px); box-shadow: 0 2px 0 #cc8800; }
+
+    .hard-btn {
+      width: 290px;
+      padding: 18px;
+      font-size: 22px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 0 #cc2222;
+      transition: transform 0.1s;
+    }
+    .hard-btn:hover { background-color: #cc2222; transform: translateY(2px); box-shadow: 0 2px 0 #cc2222; }
+
+    #difficulty-badge {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 6px 16px;
+      border-radius: 20px;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -183,8 +240,18 @@
     <h1>Tic Tac Toe!</h1>
     <p class="subtitle">How do you want to play?</p>
     <button class="mode-btn" onclick="startLocal()">👫 Same Computer</button>
-    <button class="mode-btn" onclick="startCPU()">🤖 vs Computer</button>
+    <button class="mode-btn" onclick="showDifficultyMenu()">🤖 vs Computer</button>
     <button class="mode-btn" onclick="showOnlineMenu()">🌐 Play Online</button>
+  </div>
+
+  <!-- DIFFICULTY SCREEN -->
+  <div id="difficulty-screen" class="screen hidden">
+    <h1>vs Computer</h1>
+    <p class="subtitle">Pick a difficulty!</p>
+    <button class="easy-btn" onclick="startCPU('easy')">🟢 Easy — I'm just learning!</button>
+    <button class="medium-btn" onclick="startCPU('medium')">🟡 Intermediate — Bring it on!</button>
+    <button class="hard-btn" onclick="startCPU('hard')">🔴 Advanced — I'm unbeatable!</button>
+    <button class="small-btn pink" onclick="showMenu()">← Back</button>
   </div>
 
   <!-- ONLINE MENU -->
@@ -210,6 +277,7 @@
   <div id="game-screen" class="screen hidden">
     <h1>Tic Tac Toe!</h1>
     <div id="your-symbol"></div>
+    <div id="difficulty-badge"></div>
     <div id="message">Let's play!</div>
     <div id="turn">It's X's turn!</div>
     <div id="board">
@@ -237,6 +305,7 @@
     let currentPlayer = 'X';
     let gameOver = false;
     let mode = '';
+    let difficulty = 'easy'; // 'easy', 'medium', 'hard'
     let roomCode = '';
     let firebaseListener = null;
 
@@ -250,9 +319,10 @@
     const messageEl = document.getElementById('message');
     const turnEl = document.getElementById('turn');
     const yourSymbolEl = document.getElementById('your-symbol');
+    const difficultyBadgeEl = document.getElementById('difficulty-badge');
 
     function showScreen(id) {
-      ['menu-screen','online-screen','waiting-screen','game-screen'].forEach(s => {
+      ['menu-screen','difficulty-screen','online-screen','waiting-screen','game-screen'].forEach(s => {
         document.getElementById(s).classList.add('hidden');
       });
       document.getElementById(id).classList.remove('hidden');
@@ -264,17 +334,27 @@
     }
 
     function showOnlineMenu() { showScreen('online-screen'); }
+    function showDifficultyMenu() { showScreen('difficulty-screen'); }
 
     function startLocal() {
       mode = 'local';
       yourSymbolEl.textContent = '';
+      difficultyBadgeEl.textContent = '';
       resetBoard();
       showScreen('game-screen');
     }
 
-    function startCPU() {
+    function startCPU(level) {
       mode = 'cpu';
+      difficulty = level;
       yourSymbolEl.textContent = 'You are X!';
+
+      // Show a coloured badge for the difficulty
+      const labels = { easy: '🟢 Easy', medium: '🟡 Intermediate', hard: '🔴 Advanced' };
+      const colors = { easy: '#33bb55', medium: '#ffaa00', hard: '#ff4444' };
+      difficultyBadgeEl.textContent = labels[level];
+      difficultyBadgeEl.style.backgroundColor = colors[level];
+
       resetBoard();
       showScreen('game-screen');
       turnEl.textContent = "Your turn!";
@@ -353,11 +433,28 @@
       return null;
     }
 
-    // CPU uses minimax - plays smart!
+    // CPU move - picks strategy based on difficulty
     function cpuMove() {
       if (gameOver) return;
-      const move = getBestMove([...board]);
+      let move;
+
+      if (difficulty === 'easy') {
+        // Easy: always picks a random empty spot
+        move = getRandomMove();
+      } else if (difficulty === 'medium') {
+        // Intermediate: 50% chance of smart move, 50% random
+        move = Math.random() < 0.5 ? getBestMove([...board]) : getRandomMove();
+      } else {
+        // Advanced: always picks the best move (unbeatable!)
+        move = getBestMove([...board]);
+      }
+
       if (move !== -1) makeMove(move, 'O');
+    }
+
+    function getRandomMove() {
+      const empty = board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+      return empty.length > 0 ? empty[Math.floor(Math.random() * empty.length)] : -1;
     }
 
     function getBestMove(b) {
