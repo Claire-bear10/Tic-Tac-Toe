@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic Tac Toe!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
   <style>
+    * { box-sizing: border-box; }
+
     body {
       background-color: #fff0f8;
       display: flex;
@@ -13,23 +16,74 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
     }
 
     h1 {
       color: #6600cc;
       font-size: 48px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       text-shadow: 2px 2px #ffb3de;
+      text-align: center;
     }
 
-    #message {
-      font-size: 28px;
-      color: #cc0077;
-      margin-bottom: 20px;
-      min-height: 40px;
-      font-weight: bold;
+    .subtitle {
+      font-size: 20px;
+      color: #aaa;
+      margin: 0 0 10px 0;
     }
+
+    .screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hidden { display: none !important; }
+
+    .mode-btn {
+      width: 290px;
+      padding: 18px;
+      font-size: 22px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      background-color: #3366ff;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 0 #1a44cc;
+      transition: transform 0.1s;
+    }
+
+    .mode-btn:hover {
+      background-color: #254dc7;
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #1a44cc;
+    }
+
+    .small-btn {
+      padding: 10px 24px;
+      font-size: 18px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      background-color: #3366ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 3px 0 #1a44cc;
+    }
+
+    .small-btn:hover { background-color: #254dc7; }
+
+    .small-btn.pink {
+      background-color: #ff69b4;
+      box-shadow: 0 3px 0 #cc4488;
+    }
+
+    .small-btn.pink:hover { background-color: #cc4488; }
 
     #board {
       display: grid;
@@ -55,138 +109,396 @@
       user-select: none;
     }
 
-    .cell:hover {
-      background-color: #ffe0f4;
-    }
+    .cell:hover { background-color: #ffe0f4; }
+    .cell.x { color: #7700cc; }
+    .cell.o { color: #ff69b4; }
+    .cell.winner { background-color: #ffe066; }
 
-    .cell.x {
-      color: #7700cc;
-    }
-
-    .cell.o {
-      color: #ff69b4;
-    }
-
-    .cell.winner {
-      background-color: #ffe066;
-    }
-
-    #restart-btn {
-      margin-top: 30px;
-      padding: 14px 36px;
-      font-size: 22px;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background-color: #3366ff;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      cursor: pointer;
+    #message {
+      font-size: 26px;
+      color: #cc0077;
+      min-height: 36px;
       font-weight: bold;
-      box-shadow: 0 4px 0 #1a44cc;
-      transition: transform 0.1s;
-    }
-
-    #restart-btn:hover {
-      background-color: #254dc7;
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #1a44cc;
+      text-align: center;
     }
 
     #turn {
-      font-size: 22px;
+      font-size: 20px;
       color: #555;
-      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    #room-display {
+      background: #3366ff;
+      color: white;
+      padding: 14px 32px;
+      border-radius: 14px;
+      font-size: 40px;
+      font-weight: bold;
+      letter-spacing: 10px;
+    }
+
+    .room-input {
+      padding: 12px;
+      font-size: 28px;
+      font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+      border: 4px solid #3366ff;
+      border-radius: 10px;
+      text-align: center;
+      width: 180px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: #fff0f8;
+      color: #333;
+    }
+
+    #waiting-msg {
+      font-size: 20px;
+      color: #aaa;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    #your-symbol {
+      font-size: 22px;
+      color: #6600cc;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-  <h1>Tic Tac Toe!</h1>
-  <div id="message">Let's play!</div>
-  <div id="turn">It's X's turn!</div>
-
-  <div id="board">
-    <div class="cell" data-index="0"></div>
-    <div class="cell" data-index="1"></div>
-    <div class="cell" data-index="2"></div>
-    <div class="cell" data-index="3"></div>
-    <div class="cell" data-index="4"></div>
-    <div class="cell" data-index="5"></div>
-    <div class="cell" data-index="6"></div>
-    <div class="cell" data-index="7"></div>
-    <div class="cell" data-index="8"></div>
+  <!-- MENU SCREEN -->
+  <div id="menu-screen" class="screen">
+    <h1>Tic Tac Toe!</h1>
+    <p class="subtitle">How do you want to play?</p>
+    <button class="mode-btn" onclick="startLocal()">👫 Same Computer</button>
+    <button class="mode-btn" onclick="startCPU()">🤖 vs Computer</button>
+    <button class="mode-btn" onclick="showOnlineMenu()">🌐 Play Online</button>
   </div>
 
-  <button id="restart-btn">Play Again!</button>
+  <!-- ONLINE MENU -->
+  <div id="online-screen" class="screen hidden">
+    <h1>Play Online!</h1>
+    <button class="mode-btn" onclick="createOnlineGame()">✨ Create Game</button>
+    <p class="subtitle">— or join a friend's game —</p>
+    <input class="room-input" id="room-input" placeholder="CODE" maxlength="4">
+    <button class="mode-btn" onclick="joinOnlineGame()">🎮 Join Game</button>
+    <button class="small-btn pink" onclick="showMenu()">← Back</button>
+  </div>
+
+  <!-- WAITING SCREEN -->
+  <div id="waiting-screen" class="screen hidden">
+    <h1>Tic Tac Toe!</h1>
+    <p class="subtitle">Share this code with your friend:</p>
+    <div id="room-display"></div>
+    <p id="waiting-msg">Waiting for friend to join...</p>
+    <button class="small-btn pink" onclick="showMenu()">← Back</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen hidden">
+    <h1>Tic Tac Toe!</h1>
+    <div id="your-symbol"></div>
+    <div id="message">Let's play!</div>
+    <div id="turn">It's X's turn!</div>
+    <div id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+    <div class="btn-row">
+      <button class="small-btn" onclick="restartGame()">Play Again!</button>
+      <button class="small-btn pink" onclick="showMenu()">Main Menu</button>
+    </div>
+  </div>
 
   <script>
-    const cells = document.querySelectorAll('.cell');
-    const message = document.getElementById('message');
-    const turnText = document.getElementById('turn');
-    const restartBtn = document.getElementById('restart-btn');
+    const FIREBASE_PROJECT = 'YOUR-PROJECT-ID-HERE';
+    const DB_URL = `https://${FIREBASE_PROJECT}-default-rtdb.firebaseio.com`;
 
-    let board = ['', '', '', '', '', '', '', '', ''];
+    let board = ['','','','','','','','',''];
     let currentPlayer = 'X';
     let gameOver = false;
+    let mode = '';
+    let roomCode = '';
+    let firebaseListener = null;
 
     const winningCombos = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-      [0, 4, 8], [2, 4, 6]             // diagonals
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
     ];
 
-    function checkWinner() {
-      for (const combo of winningCombos) {
-        const [a, b, c] = combo;
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          return combo;
-        }
-      }
-      return null;
+    const cells = document.querySelectorAll('.cell');
+    const messageEl = document.getElementById('message');
+    const turnEl = document.getElementById('turn');
+    const yourSymbolEl = document.getElementById('your-symbol');
+
+    function showScreen(id) {
+      ['menu-screen','online-screen','waiting-screen','game-screen'].forEach(s => {
+        document.getElementById(s).classList.add('hidden');
+      });
+      document.getElementById(id).classList.remove('hidden');
     }
 
-    function handleClick(e) {
-      const index = e.target.dataset.index;
-      if (board[index] || gameOver) return;
+    function showMenu() {
+      stopFirebaseListener();
+      showScreen('menu-screen');
+    }
 
-      board[index] = currentPlayer;
-      e.target.textContent = currentPlayer;
-      e.target.classList.add(currentPlayer.toLowerCase());
+    function showOnlineMenu() { showScreen('online-screen'); }
+
+    function startLocal() {
+      mode = 'local';
+      yourSymbolEl.textContent = '';
+      resetBoard();
+      showScreen('game-screen');
+    }
+
+    function startCPU() {
+      mode = 'cpu';
+      yourSymbolEl.textContent = 'You are X!';
+      resetBoard();
+      showScreen('game-screen');
+      turnEl.textContent = "Your turn!";
+    }
+
+    function resetBoard() {
+      board = ['','','','','','','','',''];
+      currentPlayer = 'X';
+      gameOver = false;
+      messageEl.textContent = "Let's play!";
+      if (mode === 'local') turnEl.textContent = "It's X's turn!";
+      cells.forEach(cell => { cell.textContent = ''; cell.className = 'cell'; });
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', () => {
+      const index = parseInt(cell.dataset.index);
+      if (board[index] || gameOver) return;
+      if (mode === 'online-x' && currentPlayer !== 'X') return;
+      if (mode === 'online-o' && currentPlayer !== 'O') return;
+
+      makeMove(index, currentPlayer);
+
+      if (mode === 'online-x' || mode === 'online-o') {
+        pushGameToFirebase();
+      } else if (mode === 'cpu' && !gameOver) {
+        setTimeout(cpuMove, 500);
+      }
+    }));
+
+    function makeMove(index, player) {
+      if (board[index] || gameOver) return;
+      board[index] = player;
+      cells[index].textContent = player;
+      cells[index].classList.add(player.toLowerCase());
 
       const winCombo = checkWinner();
       if (winCombo) {
         winCombo.forEach(i => cells[i].classList.add('winner'));
-        message.textContent = currentPlayer === 'X' ? '🎉 X wins! Woohoo!' : '🎉 O wins! Woohoo!';
-        turnText.textContent = '';
+        messageEl.textContent = player === 'X' ? '🎉 X wins! Woohoo!' : '🎉 O wins! Woohoo!';
+        turnEl.textContent = '';
         gameOver = true;
         return;
       }
 
-      if (board.every(cell => cell !== '')) {
-        message.textContent = "It's a tie! Good game!";
-        turnText.textContent = '';
+      if (board.every(c => c !== '')) {
+        messageEl.textContent = "It's a tie! Good game!";
+        turnEl.textContent = '';
         gameOver = true;
         return;
       }
 
-      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-      turnText.textContent = `It's ${currentPlayer}'s turn!`;
+      currentPlayer = player === 'X' ? 'O' : 'X';
+      updateTurnText();
     }
 
-    function restart() {
-      board = ['', '', '', '', '', '', '', '', ''];
-      currentPlayer = 'X';
-      gameOver = false;
-      message.textContent = "Let's play!";
-      turnText.textContent = "It's X's turn!";
-      cells.forEach(cell => {
-        cell.textContent = '';
-        cell.className = 'cell';
+    function updateTurnText() {
+      if (mode === 'local') turnEl.textContent = `It's ${currentPlayer}'s turn!`;
+      else if (mode === 'cpu') turnEl.textContent = currentPlayer === 'X' ? "Your turn!" : "Computer is thinking...";
+      else if (mode === 'online-x') turnEl.textContent = currentPlayer === 'X' ? "Your turn! (X)" : "Friend's turn... (O)";
+      else if (mode === 'online-o') turnEl.textContent = currentPlayer === 'O' ? "Your turn! (O)" : "Friend's turn... (X)";
+    }
+
+    function checkWinner() {
+      for (const combo of winningCombos) {
+        const [a,b,c] = combo;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) return combo;
+      }
+      return null;
+    }
+
+    function checkWinnerBoard(b) {
+      for (const combo of winningCombos) {
+        const [a,x,c] = combo;
+        if (b[a] && b[a] === b[x] && b[a] === b[c]) return b[a];
+      }
+      return null;
+    }
+
+    // CPU uses minimax - plays smart!
+    function cpuMove() {
+      if (gameOver) return;
+      const move = getBestMove([...board]);
+      if (move !== -1) makeMove(move, 'O');
+    }
+
+    function getBestMove(b) {
+      let best = -Infinity, bestMove = -1;
+      for (let i = 0; i < 9; i++) {
+        if (b[i] === '') {
+          b[i] = 'O';
+          const score = minimax(b, false);
+          b[i] = '';
+          if (score > best) { best = score; bestMove = i; }
+        }
+      }
+      return bestMove;
+    }
+
+    function minimax(b, isMax) {
+      const winner = checkWinnerBoard(b);
+      if (winner === 'O') return 10;
+      if (winner === 'X') return -10;
+      if (b.every(c => c !== '')) return 0;
+      if (isMax) {
+        let best = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (b[i] === '') { b[i] = 'O'; best = Math.max(best, minimax(b, false)); b[i] = ''; }
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (b[i] === '') { b[i] = 'X'; best = Math.min(best, minimax(b, true)); b[i] = ''; }
+        }
+        return best;
+      }
+    }
+
+    // ONLINE - FIREBASE
+    function generateRoomCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let code = '';
+      for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      return code;
+    }
+
+    async function createOnlineGame() {
+      if (FIREBASE_PROJECT === 'YOUR-PROJECT-ID-HERE') {
+        alert('Online play needs Firebase set up first!');
+        return;
+      }
+      roomCode = generateRoomCode();
+      mode = 'online-x';
+      await fetch(`${DB_URL}/games/${roomCode}.json`, {
+        method: 'PUT',
+        body: JSON.stringify({ board: ['','','','','','','','',''], currentPlayer: 'X', gameOver: false, message: "Let's play!", winCombo: null, players: { X: true } })
+      });
+      document.getElementById('room-display').textContent = roomCode;
+      showScreen('waiting-screen');
+      listenForGameStart();
+    }
+
+    async function joinOnlineGame() {
+      if (FIREBASE_PROJECT === 'YOUR-PROJECT-ID-HERE') {
+        alert('Online play needs Firebase set up first!');
+        return;
+      }
+      const code = document.getElementById('room-input').value.toUpperCase().trim();
+      if (code.length !== 4) { alert("Please enter a 4-letter code!"); return; }
+      const res = await fetch(`${DB_URL}/games/${code}.json`);
+      const data = await res.json();
+      if (!data) { alert("Room not found! Check the code and try again."); return; }
+      roomCode = code;
+      mode = 'online-o';
+      await fetch(`${DB_URL}/games/${roomCode}/players/O.json`, { method: 'PUT', body: JSON.stringify(true) });
+      yourSymbolEl.textContent = 'You are O!';
+      resetBoard();
+      showScreen('game-screen');
+      turnEl.textContent = "Friend's turn... (X)";
+      messageEl.textContent = "You are O — wait for X!";
+      listenForMoves();
+    }
+
+    function listenForGameStart() {
+      firebaseListener = new EventSource(`${DB_URL}/games/${roomCode}.json`);
+      firebaseListener.addEventListener('put', (e) => {
+        const data = JSON.parse(e.data).data;
+        if (data && data.players && data.players.O) {
+          stopFirebaseListener();
+          yourSymbolEl.textContent = 'You are X! You go first!';
+          resetBoard();
+          showScreen('game-screen');
+          turnEl.textContent = "Your turn! (X)";
+          listenForMoves();
+        }
       });
     }
 
-    cells.forEach(cell => cell.addEventListener('click', handleClick));
-    restartBtn.addEventListener('click', restart);
+    function listenForMoves() {
+      firebaseListener = new EventSource(`${DB_URL}/games/${roomCode}.json`);
+      firebaseListener.addEventListener('put', (e) => {
+        const data = JSON.parse(e.data).data;
+        if (data) syncBoardFromFirebase(data);
+      });
+    }
+
+    function syncBoardFromFirebase(data) {
+      board = data.board;
+      currentPlayer = data.currentPlayer;
+      gameOver = data.gameOver;
+      cells.forEach((cell, i) => {
+        cell.textContent = board[i];
+        cell.className = 'cell';
+        if (board[i]) cell.classList.add(board[i].toLowerCase());
+      });
+      if (data.winCombo) data.winCombo.forEach(i => cells[i].classList.add('winner'));
+      messageEl.textContent = data.message || "Let's play!";
+      if (!gameOver) updateTurnText();
+      else turnEl.textContent = '';
+    }
+
+    async function pushGameToFirebase() {
+      const winCombo = checkWinner();
+      let message = "Let's play!";
+      if (winCombo) message = `🎉 ${board[winCombo[0]]} wins! Woohoo!`;
+      else if (board.every(c => c !== '')) message = "It's a tie! Good game!";
+      await fetch(`${DB_URL}/games/${roomCode}.json`, {
+        method: 'PATCH',
+        body: JSON.stringify({ board, currentPlayer, gameOver, winCombo: winCombo || null, message })
+      });
+    }
+
+    function stopFirebaseListener() {
+      if (firebaseListener) { firebaseListener.close(); firebaseListener = null; }
+    }
+
+    function restartGame() {
+      if (mode === 'online-x' || mode === 'online-o') {
+        showMenu();
+      } else {
+        resetBoard();
+        if (mode === 'cpu') turnEl.textContent = "Your turn!";
+      }
+    }
   </script>
 
 </body>
